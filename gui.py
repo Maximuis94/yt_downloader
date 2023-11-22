@@ -1,10 +1,13 @@
+"""
+This module contains the implementation for the graphical user interface. The GUI widgets and their callbacks are
+defined here. Furthermore, this module is executable for creating the GUI.
+"""
+
 import tkinter as tk
-from tkinter import ttk
 
 import mp3downloader as mdl
-import clip_entry as ce
+from mp3downloader import ClipEntry
 import time
-import os
 from pytube import YouTube
 
 simulating = False
@@ -12,13 +15,13 @@ simulating = False
 
 class GUI(tk.Frame):
     def __init__(self, root, **kw):
+        """ Implementation of the Graphical User Interface; runs on a tk loop """
         super().__init__(**kw)
-        self.frame_width, self.frame_height = 600, 600
+        self.frame_width, self.frame_height = 700, 250
         self.entries = []
-        self.queueposition = 1
-        self.artimage = None
+        self.queue_position = 1
+        self.art_image = None
         self.link_loaded = False
-
 
         self.root = root
         self.root.title("YouTube Downloader")
@@ -29,8 +32,7 @@ class GUI(tk.Frame):
         tk.Label(self.frame, text="YouTube URL:").pack(side='left')
         self.url_input = tk.Entry(self.frame, width=60)
         self.url_input.pack(padx=10, side='left')
-        self.url_input.insert(0, 'http://www.youtube.com/watch?v=dQw4w9WgXcQ')
-
+        self.url_input.insert(0, 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
 
         self.show_button = tk.Button(self.frame, text='Load URL')
         self.show_button.pack(side='left', padx=2)
@@ -39,23 +41,23 @@ class GUI(tk.Frame):
         self.frame2 = tk.Frame(self.root)
         self.frame2.pack(fill='x')
 
-        self.cliptitlelabeltext = "Title"
-        self.cliptitlelabel = tk.Label(self.frame2, text=self.cliptitlelabeltext, width=50)
-        self.cliptitlelabel.pack(pady=10, side='left')
+        self.clip_title_label_text = ""
+        self.clip_title_label = tk.Label(self.frame2, text=self.clip_title_label_text, width=50)
+        self.clip_title_label.pack(pady=10, side='left')
 
         self.frame3 = tk.Frame(self.root)
         self.frame3.pack(fill='x')
 
-        self.namelabeltext = "Track name:"
-        self.namelabel = tk.Label(self.frame3, text=self.namelabeltext, width=15)
-        self.namelabel.pack(side='left')
+        self.name_label_text = "Track name:"
+        self.name_label = tk.Label(self.frame3, text=self.name_label_text, width=15)
+        self.name_label.pack(side='left')
         self.name_input = tk.Entry(self.frame3, width=40)
         self.name_input.pack(padx=10, side='left')
         self.name_input.insert(0, '')
 
-        self.artistlabeltext = "Artist:"
-        self.artistlabel = tk.Label(self.frame3, text=self.artistlabeltext, width=15)
-        self.artistlabel.pack(side='left')
+        self.artist_label_text = "Artist:"
+        self.artist_label = tk.Label(self.frame3, text=self.artist_label_text, width=15)
+        self.artist_label.pack(side='left')
         self.artist_input = tk.Entry(self.frame3, width=40)
         self.artist_input.pack(padx=10, side='left')
         self.artist_input.insert(0, '')
@@ -63,43 +65,43 @@ class GUI(tk.Frame):
         self.frame4 = tk.Frame(self.root)
         self.frame4.pack(fill='x')
 
-        self.albumlabeltext = "Album:"
-        self.albumlabel = tk.Label(self.frame4, text=self.albumlabeltext, width=15)
-        self.albumlabel.pack(side='left')
+        self.album_label_text = "Album:"
+        self.album_label = tk.Label(self.frame4, text=self.album_label_text, width=15)
+        self.album_label.pack(side='left')
         self.album_input = tk.Entry(self.frame4, width=40)
         self.album_input.pack(padx=10, side='left')
         self.album_input.insert(0, '')
 
-        self.contartistlabeltext = "Contributing artist:"
-        self.contartistlabel = tk.Label(self.frame4, text=self.contartistlabeltext, width=15)
-        self.contartistlabel.pack(side='left')
-        self.contartist_input = tk.Entry(self.frame4, width=40)
-        self.contartist_input.pack(padx=10, side='left')
-        self.contartist_input.insert(0, '')
+        self.cont_artist_label_text = "Contributing artist:"
+        self.cont_artist_label = tk.Label(self.frame4, text=self.cont_artist_label_text, width=15)
+        self.cont_artist_label.pack(side='left')
+        self.cont_artist_input = tk.Entry(self.frame4, width=40)
+        self.cont_artist_input.pack(padx=10, side='left')
+        self.cont_artist_input.insert(0, '')
 
         self.frame5 = tk.Frame(self.root)
         self.frame5.pack(fill='x')
 
-        self.genrelabeltext = "Genre:"
-        self.genrelabel = tk.Label(self.frame5, text=self.genrelabeltext, width=15)
-        self.genrelabel.pack(side='left')
+        self.genre_label_text = "Genre:"
+        self.genre_label = tk.Label(self.frame5, text=self.genre_label_text, width=15)
+        self.genre_label.pack(side='left')
         self.genre_input = tk.Entry(self.frame5, width=40)
         self.genre_input.pack(padx=10, side='left')
         self.genre_input.insert(0, '')
 
-        self.yearlabeltext = "Year:"
-        self.yearlabel = tk.Label(self.frame5, text=self.yearlabeltext, width=15)
-        self.yearlabel.pack(side='left')
+        self.year_label_text = "Year:"
+        self.year_label = tk.Label(self.frame5, text=self.year_label_text, width=15)
+        self.year_label.pack(side='left')
         self.year_input = tk.Entry(self.frame5, width=40)
         self.year_input.pack(padx=10, side='left')
         self.year_input.insert(0, '')
 
         self.frame6 = tk.Frame(self.root)
-        self.frame6.pack(pady=10,fill='x')
+        self.frame6.pack(pady=10, fill='x')
 
-        self.artlabeltext = "Album artwork"
-        self.artlabel = tk.Label(self.frame6,text=self.artlabeltext)
-        self.artlabel.pack(side='left')
+        self.art_label_text = "Album artwork"
+        self.art_label = tk.Label(self.frame6, text=self.art_label_text)
+        self.art_label.pack(side='left')
 
         self.art_upload_button = tk.Button(self.frame6, text='Upload')
         self.art_upload_button.pack(side='left', padx=4)
@@ -115,156 +117,150 @@ class GUI(tk.Frame):
         
         # self.save_temp_file = tk.Checkbutton(self.frame6, text='Save temp file')
         self.remove_temp = False
-        self.save_temp_file = tk.Checkbutton(self.frame6, text='Save temp file', command=self.checkbox_click, onvalue=True, offvalue=False)
+        self.save_temp_file = tk.Checkbutton(self.frame6, text='Save temp file', command=self.checkbox_click)
         self.save_temp_file.pack(padx=5, side='right')
 
         self.frame7 = tk.Frame(self.root)
         self.frame7.pack(fill='x')
 
-        self.queuepositionlabeltext = "Current position in queue: 1/0"
-        self.queuepositionlabel = tk.Label(self.frame7, text=self.queuepositionlabeltext, width=25)
-        self.queuepositionlabel.pack(padx=10,side='left')
-
         self.start_button = tk.Button(self.frame7, text='Start downloading')
-        self.start_button.pack(side='left', padx=4)
+        self.start_button.pack(side='left', padx=25)
         self.start_button.bind('<Button-1>', self.start_button_click)
 
-        self.previous_button = tk.Button(self.frame7, text='Previous entry')
-        self.previous_button.pack(side='right',padx=30)
-        self.previous_button.bind('<Button-1>', self.previous_button_click)
-
         self.save_button = tk.Button(self.frame7, text='Save / add to queue')
-        self.save_button.pack(side='right',padx=90)
+        self.save_button.pack(side='left', padx=10)
         self.save_button.bind('<Button-1>', self.save_button_click)
 
+        self.queue_position_label_text = "Current position in queue: 1/0"
+        self.queue_position_label = tk.Label(self.frame7, text=self.queue_position_label_text, width=25)
+        self.queue_position_label.pack(padx=10, side='left')
+
+        self.previous_button = tk.Button(self.frame7, text='Previous entry')
+        self.previous_button.pack(side='left', padx=10)
+        self.previous_button.bind('<Button-1>', self.previous_button_click)
+
     def get_root(self):
+        """ Return the root frame of the GUI """
         return self.root
 
     def update_queue_text(self):
-        self.queuepositionlabeltext = "Current position in queue: " + str(self.queueposition) + "/" + str(len(self.entries))
-        self.queuepositionlabel.configure(text=self.queuepositionlabeltext)
+        """ Update the queue position label """
+        self.queue_position_label_text = f"Current position in queue: {self.queue_position}/{len(self.entries)}"
+        self.queue_position_label.configure(text=self.queue_position_label_text)
 
-    def read_input(self):
-        artinput = self.art_url_input.get()
-        if artinput == 'Insert artwork image URL here':
-            artinput = ''
+    def parse_input(self):
+        """ Parse input fields for mp3 metadata """
+        art_input = self.art_url_input.get()
+        if art_input == 'Insert artwork image URL here':
+            art_input = ''
 
-        return ce.ClipEntry(self.url_input.get(),title=self.cliptitlelabel.cget('text'),name=self.name_input.get(),
-                             artist=self.artist_input.get(),contartist=self.contartist_input.get(),
-                             album=self.album_input.get(),genre=self.genre_input.get(),year=self.year_input.get(),
-                            imageurl=artinput)
-
+        return ClipEntry(self.url_input.get(), title=self.clip_title_label.cget('text'), name=self.name_input.get(),
+                         artist=self.artist_input.get(), cont_artist=self.cont_artist_input.get(),
+                         album=self.album_input.get(), genre=self.genre_input.get(), year=self.year_input.get(),
+                         image_url=art_input)
 
     def reset_input(self):
-        END=999
-        self.url_input.delete(0, END)
-        self.cliptitlelabeltext = ""
-        self.cliptitlelabel.configure(text=self.cliptitlelabeltext)
-        self.name_input.delete(0, END)
-        self.artist_input.delete(0, END)
-        self.contartist_input.delete(0, END)
-        self.album_input.delete(0, END)
-        self.genre_input.delete(0, END)
-        self.year_input.delete(0, END)
-        self.art_url_input.delete(0, END)
-        self.artimage = None
+        """ Reset input fields to their default (empty) values """
+        str_end = 999
+        self.url_input.delete(0, str_end)
+        self.clip_title_label_text = ""
+        self.clip_title_label.configure(text=self.clip_title_label_text)
+        self.name_input.delete(0, str_end)
+        self.artist_input.delete(0, str_end)
+        self.cont_artist_input.delete(0, str_end)
+        self.album_input.delete(0, str_end)
+        self.genre_input.delete(0, str_end)
+        self.year_input.delete(0, str_end)
+        self.art_url_input.delete(0, str_end)
+        self.art_image = None
         self.link_loaded = False
 
-    def load_entry(self,entry):
-        END = 999
-        self.url_input.delete(0, END)
+    def load_entry(self, entry: ClipEntry):
+        """ Fill the input fields with the given ClipEntry """
+        self.reset_input()
         self.url_input.insert(0, entry.url)
-        self.cliptitlelabeltext = entry.title
-        self.cliptitlelabel.configure(text=self.cliptitlelabeltext)
-        self.name_input.delete(0, END)
+        self.clip_title_label_text = entry.title
+        self.clip_title_label.configure(text=self.clip_title_label_text)
         self.name_input.insert(0, entry.name)
-        self.artist_input.delete(0, END)
         self.artist_input.insert(0, entry.artist)
-        self.contartist_input.delete(0, END)
-        self.contartist_input.insert(0, entry.contartist)
-        self.album_input.delete(0, END)
+        self.cont_artist_input.insert(0, entry.cont_artist)
         self.album_input.insert(0, entry.album)
-        self.genre_input.delete(0, END)
         self.genre_input.insert(0, entry.genre)
-        self.year_input.delete(0, END)
         self.year_input.insert(0, entry.year)
-        self.art_url_input.delete(0, END)
-        self.art_url_input.insert(0, entry.imageurl)
-        self.artimage = None
+        self.art_url_input.insert(0, entry.image_url)
+        self.art_image = None
         self.link_loaded = True
 
-    # Tested
-    # Load the URL and show the title
-    # Create YouTube object from URL, extract title
-    # Title is shown so the user can verify the URL
     def show_button_click(self, event):
-        print("getting title of " + self.url_input.get())
-        print(type(self.url_input.get()))
-        yt = YouTube(self.url_input.get())
-        self.cliptitlelabeltext = yt.title
-        self.cliptitlelabel.configure(text=self.cliptitlelabeltext)
+        """ Load URL button callback -- Show URL title for user to verify the given URL """
+        self.clip_title_label_text = YouTube(self.url_input.get()).title
+        self.clip_title_label.configure(text=self.clip_title_label_text)
         self.link_loaded = True
 
-    #TO DO
-    # Open a menu to allow the user to upload album artwork
     def art_upload_button_click(self, event):
+        """ TO-DO --- callback for uploading image artwork (open dialogue for selecting image?) """
         print("ART UPLOAD CLICKED")
+        self.art_image = None
 
-    #TO DO
     def thumbnail_art_button_click(self, event):
+        """ TO-DO --- callback for setting thumbnail image """
         print("THUMBNAIL ART CLICKED")
+        self.art_image = None
 
     def save_button_click(self, event):
+        """ Save button callback -- Add url + metadata to queue and reset input fields """
         # Safeguard for invalid YouTube links
         if self.link_loaded is False:
-            self.cliptitlelabel.configure(text="*** Please paste a YouTube URL and click Load URL ***")
+            self.clip_title_label.configure(text="*** Please paste a YouTube URL and click Load URL ***")
             return
         # Im on the highest position in queue possible; this is a new entry
-        if self.queueposition == len(self.entries)+1:
-            self.entries.append(self.read_input())
+        if self.queue_position == len(self.entries)+1:
+            self.entries.append(self.parse_input())
         # Modify the entry on the index of queueposition-1
         else:
-            self.entries[self.queueposition-1] = self.read_input()
+            self.entries[self.queue_position - 1] = self.parse_input()
 
         self.reset_input()
 
         # Set position to no. of entries+1 (= new entry)
-        self.queueposition = len(self.entries) + 1
+        self.queue_position = len(self.entries) + 1
         self.update_queue_text()
 
     # Open a menu to allow the user to upload album artwork
     def previous_button_click(self, event):
-        self.queueposition = self.queueposition - 1
-        if self.queueposition < 1:
-            self.queueposition = len(self.entries)+1
-        self.queuepositionlabeltext = "Position in queue: " + str(self.queueposition) + "/" + str(len(self.entries)+1)
-        if self.queueposition > len(self.entries):
+        """ Previous button callback -- Load entry from previous queue index """
+        self.queue_position = self.queue_position - 1
+        if self.queue_position < 1:
+            self.queue_position = len(self.entries) + 1
+        self.queue_position_label_text = "Position in queue: " + str(self.queue_position) + "/" + str(len(self.entries) + 1)
+        if self.queue_position > len(self.entries):
             self.reset_input()
         else:
-            self.load_entry(self.entries[self.queueposition-1])
+            self.load_entry(self.entries[self.queue_position - 1])
         self.update_queue_text()
         print("PREVIOUS CLICKED")
 
     # Start button is clicked; set simulation to true and save the parameters that have been set so that they can be
     # used in the simulation
     def start_button_click(self, event):
-        self.cliptitlelabeltext = "Processing queue..."
-        self.cliptitlelabel.configure(text=self.cliptitlelabeltext)
+        """ Start button callback -- Download all queued mp3s """
+        self.clip_title_label_text = "Processing queue..."
+        self.clip_title_label.configure(text=self.clip_title_label_text)
         to_remove = []
         if len(self.entries) == 0:
             return
         time.sleep(1)
         #os.chdir('./Tracks/')
         for e in self.entries:
-            mp3dl = mdl.MP3Downloader(file_name=e.title, entry=e, infolabel=self.cliptitlelabel)
-            mp3dl.download_best_mp3(first_stream=False, remove_temp=not self.remove_temp)
+            mp3dl = mdl.MP3Downloader(file_name=e.title, entry=e, info_label=self.clip_title_label)
+            mp3dl.download_mp3(first_stream=False, remove_temp=not self.remove_temp)
             print("Downloaded MP3")
             # Execute MP3 download code
             to_remove.append(e)
         # If downloaded, remove from list
         for e in to_remove:
             self.entries.remove(e)
-        self.queueposition = len(self.entries)+1
+        self.queue_position = len(self.entries) + 1
         self.update_queue_text()
 
 
@@ -275,8 +271,10 @@ class GUI(tk.Frame):
     def checkbox_click(self, e=None):
         self.remove_temp = not self.remove_temp
 
+
 if __name__ == "__main__":
     root = tk.Tk()
     gui = GUI(root)
+    root.geometry(f"{gui.frame_width}x{gui.frame_height}")
     root = gui.get_root()
     root.mainloop()
